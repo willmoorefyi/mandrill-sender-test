@@ -1,0 +1,80 @@
+buildscript {
+	ext {
+		groovyVersion = '2.4.3'
+		dockerFolder = 'build/docker'
+	}
+	repositories {
+		maven {
+			name 'WebsNexus'
+			url 'http://websnexus201.vistaprint.net:8080/nexus/content/groups/public'
+		}
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.webs.gradle:git-commit-gradle-plugin:1.1.0'
+		classpath group: 'com.webs.gradle', name: 'spring-boot-docker-gradle-plugin', version: '0.0.2-SNAPSHOT'
+	}
+	ext.websNexus = repositories.findByName('WebsNexus')
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+apply plugin: 'com.webs.generate-git-info'
+apply plugin: 'com.webs.spring-boot-docker'
+
+group = 'webs'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+	add websNexus
+	jcenter()
+}
+
+dependencies {
+	// Actuator for DevOps monitoring
+	compile "org.springframework.boot:spring-boot-starter-actuator"
+
+	// The web!
+	compile "org.springframework.boot:spring-boot-starter-web"
+
+	// Use Mustache.java as the rendering engine (for now)
+	compile "com.github.spullara.mustache.java:compiler:0.9.0"
+	compile "com.github.sps.mustache:mustache-spring-view:1.3"
+	compile 'com.google.guava:guava:18.0' // undeclared dependencies? Shame on you Mustache-Spring!
+
+	// Security
+	compile "org.springframework.boot:spring-boot-starter-security"
+	compile 'org.springframework.security.oauth:spring-security-oauth2:2.0.7.RELEASE'
+
+	// logging configuration - use groovy for logback.groovy
+	compile "org.springframework.boot:spring-boot-starter-logging"
+	compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+
+	// test dependencies
+	testCompile "org.springframework.boot:spring-boot-starter-test"
+}
+
+springBootDocker {
+	imageNameUser = 'wlmoorewebs'
+	//removePreviousImage = true
+}
+
+processResources {
+	expand(project.properties)
+}
+
+bootRun {
+	dependsOn processResources
+	systemProperties System.properties
+}
+
+test {
+	testLogging {
+		showStandardStreams = true
+	}
+}
