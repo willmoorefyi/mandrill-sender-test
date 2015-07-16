@@ -3,8 +3,9 @@ package com.webs.service.mandrill.model
 import org.springframework.beans.factory.annotation.Value
 
 class Message {
-	@Value("${MANDRILL_API_KEY}")
+	@Value("\${MANDRILL_API_KEY}")
 	String key
+
 	Map message = [
 	        "text" : "",
 			"auto_html" : true,
