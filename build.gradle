@@ -41,6 +41,7 @@ dependencies {
 
 	// The web!
 	compile "org.springframework.boot:spring-boot-starter-web"
+	compile 'javax:javaee-api:7.0'
 
 	// Use Mustache.java as the rendering engine (for now)
 	compile "com.github.spullara.mustache.java:compiler:0.9.0"

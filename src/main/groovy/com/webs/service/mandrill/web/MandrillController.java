@@ -1,7 +1,5 @@
 package com.webs.service.mandrill.web;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webs.service.mandrill.model.Message;
 import com.webs.service.mandrill.model.UserInfo;
 
@@ -17,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
+
+import javax.inject.Provider;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,7 +36,7 @@ public class MandrillController {
 	private RestTemplate restTemplate;
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	Provider<Message> messageProvider;
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String getRoot() {
@@ -70,17 +70,15 @@ public class MandrillController {
 				email, title, username);
 		log.debug("Message body: '{}'", emailbody);
 
-		Message postBody = new Message();
+		Message postBody = messageProvider.get();
 		postBody.setMessageDetails(emailbody, email, title);
-		log.info("posting message: {}", objectMapper.valueToTree(postBody).toString());
-		log.debug("Posting message: {}", postBody);
+		log.debug("Posting message: {}: with body: {}", postBody.toJson());
 
 		ResponseEntity<List> response = restTemplate.postForEntity("https://mandrillapp.com/api/1.0/messages/send.json",
-				postBody,
+				postBody.toJson(),
 				List.class
 		);
 
-		//MandrillResponse responseBody = objectMapper.readValue((String)response.getBody().get(0), MandrillResponse.class);
 		log.info("Returned response status: {}, body: {}", response.getStatusCode(), response.getBody());
 
 		return "email";

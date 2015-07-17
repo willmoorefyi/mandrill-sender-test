@@ -1,11 +1,9 @@
 package com.webs.service.mandrill.model
 
-import org.springframework.beans.factory.annotation.Value
+import groovy.json.JsonOutput
 
 class Message {
-	@Value("\${MANDRILL_API_KEY}")
 	String key
-
 	Map message = [
 	        "text" : "",
 			"auto_html" : true,
@@ -18,8 +16,12 @@ class Message {
 	]
 
 	public setMessageDetails(String text, String emailTo, String emailName)  {
-		this.message.text = text;
-		this.message.to[0].email = emailTo;
-		this.message.to[0].name = emailName;
+		this.message.text = text
+		this.message.to[0].email = emailTo
+		this.message.to[0].name = emailName
+	}
+
+	def toJson() {
+		return JsonOutput.toJson(this)
 	}
 }
